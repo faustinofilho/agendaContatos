@@ -1,4 +1,4 @@
-<?php include("ui/header.htm"); ?>
+<?php include("assets/header.htm"); ?>
 <div id="content"></div>
-<?php include("ui/deleteconfirmmodal.htm"); ?>
-<?php include("ui/footer.htm"); ?>
+<?php include("assets/deleteconfirmmodal.htm"); ?>
+<?php include("assets/footer.htm"); ?>
