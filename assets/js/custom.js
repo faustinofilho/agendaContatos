@@ -181,7 +181,7 @@ function getCreateContatoForm(element) {
 				
 		form +=	'<div class="form-group">';
 		form +=	'<label for="">Celular </label>';
-		form +=	'<input type="text" id="celular" name="celular" value="" class="form-control" required/>';
+		form +=	'<input type="text" id="celular" name="celular" value="" onkeyup="mascara( this, mtel );" maxlength="15" class="form-control" required/>';
 		form += '<div class="invalid-feedback">';
 		form += 'O celular obrigatório.';
 		form += '</div>';
@@ -189,13 +189,16 @@ function getCreateContatoForm(element) {
 				
 		form +=	'<div class="form-group">';
 		form +=	'<label for="">Telefone </label>';
-		form +=	'<input type="text" id="telefone" name="telefone" value="" class="form-control" required/>';
+		form +=	'<input type="text" id="telefone" name="telefone" onkeyup="mascara( this, mtel );" maxlength="15" value="" class="form-control" required/>';
 		form +=	'</div>';	
 
 
 		form +=	'<div class="form-group">';
 		form +=	'<label for="">E-mail </label>';
-		form +=	'<input type="email" id="email" name="email" value="" class="form-control" />';
+		form +=	'<input type="email" id="email" onblur="ValidaEmail();" name="email" value="" class="form-control" />';
+		form += '<div class="invalid-feedback">';
+		form += 'E-mail inválido.';
+		form += '</div>';
 		form +=	'</div>';
 
 		form +=	'<div class="form-group">';
@@ -254,3 +257,31 @@ function deleteConfirmationContato(element) {
 }
 
 
+
+
+// Mascara para os telefones
+function mascara(o,f){
+    v_obj=o
+    v_fun=f
+    setTimeout("execmascara()",1)
+}
+function execmascara(){
+    v_obj.value=v_fun(v_obj.value)
+}
+function mtel(v){
+    v=v.replace(/\D/g,"");             //Remove tudo o que não é dígito
+    v=v.replace(/^(\d{2})(\d)/g,"($1) $2"); //Coloca parênteses em volta dos dois primeiros dígitos
+    v=v.replace(/(\d)(\d{4})$/,"$1-$2");    //Coloca hífen entre o quarto e o quinto dígitos
+    return v;
+}
+
+
+function ValidaEmail()
+{
+  var obj = $('input#email').val();
+  if ((obj.length != 0) && ((obj.indexOf("@") < 1) || (obj.indexOf('.') < 7)))
+  {
+	$( "input#email" ).addClass( "is-invalid" );
+	return false;
+  }
+}
