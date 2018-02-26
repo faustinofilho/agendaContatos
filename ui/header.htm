@@ -2,16 +2,40 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>JSON CRUD</title>
+		<title>Agenda Telefonica</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<!-- Bootstrap -->
-		<link href="ui/css/bootstrap.min.css" rel="stylesheet" media="screen">		
-		<link href="ui/css/crud.css" rel="stylesheet" media="screen">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<link rel="stylesheet" href="ui/assets/css/main.css" />
+
 	</head>
 
 	<body>
-		<div class="container">			
+		<div class="col-lg-12">			
 			
-			<div class="jumbotron">
-				<h1>JSON CRUD</h1>        
+			<nav class="navbar fixed-top navbar-expand-lg navbar-light" style="background: #563D7C">
+				<a class="navbar-brand" href="javascript:void(0);" id="home" style="color: #fff"><h1 style="color: #fff">Agenda Telefonica</h1></a>
+				<button class="navbar-toggler White" type="button" data-toggle="collapse" style="background: #fff"  data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon" ></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarText">
+					<ul class="navbar-nav mr-auto">
+						<li class="nav-item active">
+
+						<li class="nav-item active">
+							<a class="nav-link" href="javascript:void(0);" id="contato_list" style="color: #fff">Contato Listagem</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link"  href="javascript:void(0);" id="create_contato_form" style="color: #fff">Contato Cadastro</a>
+						</li>
+
+					</ul>
+				</div>
+			</nav>
+
+			<br>
+			<div class="alert alert-success" id = 'atualizar' role="alert" style="display: none">
+				Registro atualizado com sucesso!
+			</div>
+			<div class="alert alert-success" id = 'deletado' role="alert" style="display: none">
+				Registro deletado com sucesso!
 			</div>

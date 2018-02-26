@@ -1,30 +1,244 @@
 $(function() {
-	$(document).on("click", "a#user_list", function(){ getUserList(this); });	
-	$(document).on("click", "a#create_user_form", function(){ getCreateForm(this); });	
-	$(document).on("click", "button#add_user", function(){ addUser(this); });
-	$(document).on("click", "a.delete_confirm", function(){ deleteConfirmation(this); });
-	$(document).on("click", "button.delete", function(){ deleteUser(this); });
-	$(document).on("dblclick", "td.edit", function(){ makeEditable(this); });
-	$(document).on("blur", "input#editbox", function(){ removeEditable(this) });
+
+	getHome();
+
+	$(document).on("click", "a#home", function(){ getHome(); });	
+
+	// Controlle de usuarios
+	$(document).on("click", "a#contato_list", function(){ getContatoList(this); });	
+	$(document).on("click", "a#create_contato_form", function(){ getCreateContatoForm(this); });	
+	$(document).on("click", "button#add_contato", function(){ addContato(this); });
+
+	$(document).on("click", "a.delete_confirm", function(){ deleteConfirmationContato(this); });
+	$(document).on("click", "button.delete", function(){ deleteContato(this); });
+	$(document).on("dblclick", "td.edit", function(){ makeEditableContato(this); });
+	$(document).on("blur", "input#editbox", function(){ removeEditableContato(this) });
+
 });
 
-function removeEditable(element) { 
+function getHome()
+{
+	var home = '<div id="piechart"></div>';
+
+			google.charts.load('current', {'packages':['corechart']});
+			google.charts.setOnLoadCallback(drawChart);
+			
+			var arrayDados1 = [];
+			var arrayDados2 = [];
+			var arrayDados3 = [];
+			var arrayDados4 = [];
+			
+			$.post('Controller.php',
+				{
+					action: 'get_home'				
+				},
+				function(data, textStatus) {
+					$.each( data, function( index, dados){   
+						arrayDados1.push = ['Com e-mail', parseInt(dados.comEmail)];
+						arrayDados2.push = ['Sem e-mail', parseInt(dados.semEmail)];
+						arrayDados3.push = ['Que possuem sites', parseInt(dados.comSite)];
+						arrayDados4.push = ['Que não possuem sites', parseInt(dados.semSite)];
+					});					
+				}, 
+				"json"		
+			);
+			
+			function drawChart() {
+
+				var data = google.visualization.arrayToDataTable([
+					['Task', 'Hours per Day'],
+					arrayDados1.push,
+					arrayDados2.push,
+					arrayDados3.push,
+					arrayDados4.push
+				]);
+				
+				
+				var options = {'title':'Contatos', 'width':1050, 'height':600};
+				
+				var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+				chart.draw(data, options);
+			}
+
+
+	$('div#content').html(home);
+}
+
+// -----------------------------------------------------------
+
+function deleteContato(element) {	
 	
-	$('#indicator').show();
+	var Contato = new Object();
+	Contato.id = $("#delete_confirm_modal input#contato_id").val();
 	
-	var User = new Object();
-	User.id = $('.current').attr('user_id');		
-	User.field = $('.current').attr('field');
-	User.newvalue = $(element).val();
-	
-	var userJson = JSON.stringify(User);
+	var contatoJson = JSON.stringify(Contato);
 	
 	$.post('Controller.php',
 		{
-			action: 'update_field_data',			
-			user: userJson
+			action: 'delete_contato',
+			contato: contatoJson
 		},
 		function(data, textStatus) {
+
+			$("#deletado").show();
+
+			getContatoList(element);
+
+			$("#delete_confirm_modal").modal("hide");
+		}, 
+		"json"		
+	);	
+}
+
+function getContatoList(element) {
+	
+	$('#indicator').show();
+	
+	$.post('Controller.php',
+		{
+			action: 'get_contatos'				
+		},
+		function(data, textStatus) {
+			renderContatoList(data);
+			$('#indicator').hide();
+		}, 
+		"json"		
+	);
+}
+
+function renderContatoList(jsonData) {
+	
+	var table = '<br><table class="table table-striped" width="600" cellpadding="5" class="table table-hover table-bordered"><thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Email</th><th scope="col">Celular</th><th scope="col">Telefone</th><th scope="col">Site</th><th scope="col"></th></tr></thead><tbody>';
+
+	$.each( jsonData, function( index, contato){    
+		table += '<tr>';
+		table += '<td>'+contato.id+'</td>';
+		table += '<td class="edit" field="nome" contato_id="'+contato.id+'">'+contato.nome+'</td>';
+		table += '<td class="edit" field="email" contato_id="'+contato.id+'">'+contato.email+'</td>';
+		table += '<td class="edit" field="celular" contato_id="'+contato.id+'">'+contato.celular+'</td>';
+		table += '<td class="edit" field="telefone" contato_id="'+contato.id+'">'+contato.telefone+'</td>';
+		table += '<td class="edit" field="site" contato_id="'+contato.id+'">'+contato.site+'</td>';
+		table += '<td><a href="javascript:void(0);" contato_id="'+contato.id+'" class="delete_confirm btn btn-danger" data-toggle="modal" data-target="#delete_confirm_modal">Deletar</a></td>';
+		table += '</tr>';
+    });
+
+	table += '</tbody></table>';
+	
+	$('div#content').html(table);
+}
+
+function addContato(element) {	
+	
+	$('#indicator').show();
+	
+	var Contato = new Object();
+
+	Contato.nome = $('input#nome').val();
+	Contato.email = $('input#email').val();
+	Contato.celular = $('input#celular').val();
+	Contato.telefone = $('input#telefone').val();
+	Contato.site = $('input#site').val();
+	
+	$('input#nome').removeClass('is-invalid');
+	$('input#email').removeClass('is-invalid');
+	$('input#celular').removeClass('is-invalid');
+	$('input#telefone').removeClass('is-invalid');
+	$('input#site').removeClass('is-invalid');
+
+
+
+	if(Contato.nome == ''){
+		$( "input#nome" ).addClass( "is-invalid" );
+	}else if (Contato.celular == ''){
+		$( "input#celular" ).addClass( "is-invalid" );
+	} else {
+		var contatoJson = JSON.stringify(Contato);
+	
+		$.post('Controller.php',
+			{
+				action: 'add_contato',
+				contato: contatoJson
+			},
+			function(data, textStatus) {
+				getContatoList(element);
+				$('#indicator').hide();
+			}, 
+			"json"		
+		);
+	}
+	
+}
+
+function getCreateContatoForm(element) {
+	
+	var form = '<br><div class="col-lg-6"><div class="form-group">';
+		form +=	'<label for="">Nome</label>';
+		form +=	'<input type="text" id="nome" name="nome" value="" class="form-control" />';
+		form += '<div class="invalid-feedback">';
+		form += 'O nome é obrigatório.';
+		form += '</div>';		
+		form +=	'</div>';
+				
+		form +=	'<div class="form-group">';
+		form +=	'<label for="">Celular </label>';
+		form +=	'<input type="text" id="celular" name="celular" value="" class="form-control" required/>';
+		form += '<div class="invalid-feedback">';
+		form += 'O celular obrigatório.';
+		form += '</div>';
+		form +=	'</div>';
+				
+		form +=	'<div class="form-group">';
+		form +=	'<label for="">Telefone </label>';
+		form +=	'<input type="text" id="telefone" name="telefone" value="" class="form-control" required/>';
+		form +=	'</div>';	
+
+
+		form +=	'<div class="form-group">';
+		form +=	'<label for="">E-mail </label>';
+		form +=	'<input type="email" id="email" name="email" value="" class="form-control" />';
+		form +=	'</div>';
+
+		form +=	'<div class="form-group">';
+		form +=	'<label for="">Site </label>';
+		form +=	'<input type="text" id="site" name="site" value="" class="form-control" required/>';
+		form +=	'</div>';
+								
+		form +=	'<div class="form-group">';
+		form +=	'<div class="">';		
+		form +=	'<button type="button" id="add_contato" class="btn btn-primary"><i class="icon-ok icon-white"></i> Cadastrar</button>';
+		form +=	'</div>';
+		form +=	'</div>';
+		form +=	'</div>';
+		
+		$('div#content').html(form);
+}
+
+function makeEditableContato(element) { 
+	$(element).html('<input id="editbox" size="'+  $(element).text().length +'" type="text" value="'+ $(element).text() +'">');  
+	$('#editbox').focus();
+	$(element).addClass('current'); 
+}
+
+function removeEditableContato(element) { 
+	
+	$('#indicator').show();
+	
+	var Contato = new Object();
+	Contato.id = $('.current').attr('contato_id');		
+	Contato.field = $('.current').attr('field');
+	Contato.newvalue = $(element).val();
+	
+	var contatoJson = JSON.stringify(Contato);
+	
+	$.post('Controller.php',
+		{
+			action: 'update_field_data_contato',			
+			contato: contatoJson
+		},
+		function(data, textStatus) {
+
+			$("#atualizar").show();
+
 			$('td.current').html($(element).val());
 			$('.current').removeClass('current');
 			$('#indicator').hide();			
@@ -33,123 +247,10 @@ function removeEditable(element) {
 	);	
 }
 
-function makeEditable(element) { 
-	$(element).html('<input id="editbox" size="'+  $(element).text().length +'" type="text" value="'+ $(element).text() +'">');  
-	$('#editbox').focus();
-	$(element).addClass('current'); 
-}
 
-function deleteConfirmation(element) {	
+function deleteConfirmationContato(element) {	
 	$("#delete_confirm_modal").modal("show");
-	$("#delete_confirm_modal input#user_id").val($(element).attr('user_id'));
+	$("#delete_confirm_modal input#contato_id").val($(element).attr('contato_id'));
 }
 
-function deleteUser(element) {	
-	
-	var User = new Object();
-	User.id = $("#delete_confirm_modal input#user_id").val();
-	
-	var userJson = JSON.stringify(User);
-	
-	$.post('Controller.php',
-		{
-			action: 'delete_user',
-			user: userJson
-		},
-		function(data, textStatus) {
-			getUserList(element);
-			$("#delete_confirm_modal").modal("hide");
-		}, 
-		"json"		
-	);	
-}
 
-function getUserList(element) {
-	
-	$('#indicator').show();
-	
-	$.post('Controller.php',
-		{
-			action: 'get_users'				
-		},
-		function(data, textStatus) {
-			renderUserList(data);
-			$('#indicator').hide();
-		}, 
-		"json"		
-	);
-}
-
-function renderUserList(jsonData) {
-	
-	var table = '<table width="600" cellpadding="5" class="table table-hover table-bordered"><thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Mobile</th><th scope="col">Address</th><th scope="col"></th></tr></thead><tbody>';
-
-	$.each( jsonData, function( index, user){     
-		table += '<tr>';
-		table += '<td class="edit" field="name" user_id="'+user.id+'">'+user.name+'</td>';
-		table += '<td class="edit" field="email" user_id="'+user.id+'">'+user.email+'</td>';
-		table += '<td class="edit" field="mobile" user_id="'+user.id+'">'+user.mobile+'</td>';
-		table += '<td class="edit" field="address" user_id="'+user.id+'">'+user.address+'</td>';
-		table += '<td><a href="javascript:void(0);" user_id="'+user.id+'" class="delete_confirm btn btn-danger"><i class="icon-remove icon-white"></i></a></td>';
-		table += '</tr>';
-    });
-	
-	table += '</tbody></table>';
-	
-	$('div#content').html(table);
-}
-
-function addUser(element) {	
-	
-	$('#indicator').show();
-	
-	var User = new Object();
-	User.name = $('input#name').val();
-	User.email = $('input#email').val();
-	User.mobile = $('input#mobile').val();
-	User.address = $('textarea#address').val();
-	
-	var userJson = JSON.stringify(User);
-	
-	$.post('Controller.php',
-		{
-			action: 'add_user',
-			user: userJson
-		},
-		function(data, textStatus) {
-			getUserList(element);
-			$('#indicator').hide();
-		}, 
-		"json"		
-	);
-}
-
-function getCreateForm(element) {
-	var form = '<div class="input-prepend">';
-		form +=	'<span class="add-on"><i class="icon-user icon-black"></i> Name</span>';
-		form +=	'<input type="text" id="name" name="name" value="" class="input-xlarge" />';		
-		form +=	'</div><br/><br/>';
-
-		form +=	'<div class="input-prepend">';
-		form +=	'<span class="add-on"><i class="icon-envelope icon-black"></i> Email</span>';
-		form +=	'<input type="text" id="email" name="email" value="" class="input-xlarge" />';
-		form +=	'</div><br/><br/>';
-				
-		form +=	'<div class="input-prepend">';
-		form +=	'<span class="add-on"><i class="icon-headphones icon-black"></i> Mobile</span>';
-		form +=	'<input type="text" id="mobile" name="mobile" value="" class="input-xlarge" />';
-		form +=	'</div><br/><br/>';
-				
-		form +=	'<div class="input-prepend">';
-		form +=	'<span class="add-on add-on-area "><i class="icon-home icon-black"></i> Address</span>';
-		form +=	'<textarea row="5" id="address" name="address" class="input-xlarge"></textarea>';
-		form +=	'</div><br/><br/>';
-
-		form +=	'<div class="control-group">';
-		form +=	'<div class="">';		
-		form +=	'<button type="button" id="add_user" class="btn btn-primary"><i class="icon-ok icon-white"></i> Add User</button>';
-		form +=	'</div>';
-		form +=	'</div>';
-		
-		$('div#content').html(form);
-}

@@ -1,9 +1,13 @@
 <?php
+
 function __autoload($className){
 	include_once("models/$className.php");	
 }
 
-$users=new User("your_host","your_user","your_password","your_database");
+include_once ('config/Conexao.php');
+$conexao=new Conexao();
+
+$contato = new Contato();
 
 if(!isset($_POST['action'])) {
 	print json_encode(0);
@@ -11,26 +15,30 @@ if(!isset($_POST['action'])) {
 }
 
 switch($_POST['action']) {
-	case 'get_users':
-		print $users->getUsers();		
+	case 'get_home':
+		print $contato->getHome();		
 	break;
-	
-	case 'add_user':
-		$user = new stdClass;
-		$user = json_decode($_POST['user']);
-		print $users->add($user);		
+
+	case 'get_contatos':
+		print $contato->getContatos();		
 	break;
-	
-	case 'delete_user':
-		$user = new stdClass;
-		$user = json_decode($_POST['user']);
-		print $users->delete($user);		
+
+	case 'add_contato':
+		$cont = new stdClass;
+		$cont = json_decode($_POST['contato']);
+		print $contato->add($cont);		
 	break;
-	
-	case 'update_field_data':
-		$user = new stdClass;
-		$user = json_decode($_POST['user']);
-		print $users->updateValue($user);				
+
+	case 'delete_contato':
+		$cont = new stdClass;
+		$cont = json_decode($_POST['contato']);
+		print $contato->delete($cont);		
+	break;
+
+	case 'update_field_data_contato':
+		$cont = new stdClass;
+		$cont = json_decode($_POST['contato']);
+		print $contato->updateValue($cont);				
 	break;
 }
 
